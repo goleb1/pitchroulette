@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-orange: #FF8F1C;
+  --color-primary-magenta: #EB0868;
+  --color-secondary-dark-blue: #01426A;
+  --color-secondary-light-blue: #1E91D6;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #01426A 0%, #000000 100%);
+  min-height: 100vh;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
