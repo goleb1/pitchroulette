@@ -10,9 +10,10 @@ interface SettingsModalProps {
   settings: AppSettings;
   onClose: () => void;
   onSave: (settings: AppSettings) => void;
+  onViewAssignments: () => void;
 }
 
-export default function SettingsModal({ settings, onClose, onSave }: SettingsModalProps) {
+export default function SettingsModal({ settings, onClose, onSave, onViewAssignments }: SettingsModalProps) {
   const [localSettings, setLocalSettings] = useState<AppSettings>({ ...settings });
   const [targetUserText, setTargetUserText] = useState(
     localSettings.availableOptions.targetUser.join('\n')
@@ -204,7 +205,7 @@ export default function SettingsModal({ settings, onClose, onSave }: SettingsMod
             <div className="flex gap-3">
               <button
                 onClick={handleSave}
-                className="flex-1 bg-gradient-to-r from-primary-orange to-primary-magenta text-white font-bold py-3 rounded-lg hover:shadow-lg hover:shadow-primary-orange/50 transition-all"
+                className="flex-1 bg-primary-orange hover:bg-primary-magenta text-white font-bold py-3 rounded-lg transition-all"
               >
                 Save Settings
               </button>
@@ -215,6 +216,16 @@ export default function SettingsModal({ settings, onClose, onSave }: SettingsMod
                 Cancel
               </button>
             </div>
+
+            {/* View Assignments Button */}
+            {localSettings.teamAssignments.length > 0 && (
+              <button
+                onClick={onViewAssignments}
+                className="w-full bg-primary-magenta hover:bg-primary-orange text-white font-bold py-3 rounded-lg transition-all"
+              >
+                View Team Assignments ({localSettings.teamAssignments.length} {localSettings.teamAssignments.length === 1 ? 'Team' : 'Teams'})
+              </button>
+            )}
 
             <div className="flex gap-3">
               <button

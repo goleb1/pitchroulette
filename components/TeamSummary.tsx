@@ -59,9 +59,10 @@ export default function TeamSummary({ assignments, onClose }: TeamSummaryProps) 
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-orange via-primary-magenta to-primary-orange mb-4"
+            className="text-5xl md:text-6xl font-bold mb-4"
           >
-            TEAM ASSIGNMENTS
+            <span className="text-primary-orange">TEAM </span>
+            <span className="text-primary-magenta">ASSIGNMENTS</span>
           </motion.h1>
 
           {/* Action Menu Toggle */}
@@ -144,7 +145,7 @@ export default function TeamSummary({ assignments, onClose }: TeamSummaryProps) 
             >
               {/* Team Number Badge */}
               <div className="flex items-center justify-center mb-4">
-                <div className="bg-gradient-to-r from-primary-orange to-primary-magenta text-white font-bold text-2xl px-6 py-2 rounded-full">
+                <div className="bg-primary-orange text-white font-bold text-2xl px-6 py-2 rounded-full">
                   Team {assignment.teamNumber}
                 </div>
               </div>
@@ -186,7 +187,7 @@ export default function TeamSummary({ assignments, onClose }: TeamSummaryProps) 
         <div className="text-center mt-12">
           <button
             onClick={onClose}
-            className="px-8 py-3 bg-gradient-to-r from-primary-orange to-primary-magenta text-white font-bold rounded-full shadow-xl hover:shadow-primary-orange/50 transform hover:scale-105 transition-all"
+            className="px-8 py-3 bg-primary-orange hover:bg-primary-magenta text-white font-bold rounded-full shadow-xl transform hover:scale-105 transition-all"
           >
             Back to Roulette
           </button>

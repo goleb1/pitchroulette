@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import SlotReel from '@/components/SlotReel';
+import SlotLever from '@/components/SlotLever';
 import SettingsModal from '@/components/SettingsModal';
 import TeamSummary from '@/components/TeamSummary';
 import { AppSettings, Category, SpinResult, TeamAssignment } from '@/lib/types';
@@ -22,6 +23,7 @@ export default function Home() {
   const [currentSpin, setCurrentSpin] = useState<SpinResult | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
+  const [hasSpunOnce, setHasSpunOnce] = useState(false);
 
   // Load settings on mount
   useEffect(() => {
@@ -60,6 +62,7 @@ export default function Home() {
       return;
     }
 
+    setHasSpunOnce(true);
     setSpinState('spinning');
 
     // Select results for all reels FIRST
@@ -149,6 +152,101 @@ export default function Home() {
     }
   };
 
+  const handleLeverClick = () => {
+    if (spinState === 'idle') {
+      handleSpin();
+    } else if (spinState === 'stopped') {
+      // Check if this is the last team
+      if (settings && settings.currentTeamNumber === settings.numberOfTeams) {
+        setShowSummary(true);
+      } else {
+        if (!settings) return;
+
+        // Increment team number
+        const updatedSettings = { ...settings };
+        updatedSettings.currentTeamNumber += 1;
+
+        // Check if we've reached max teams
+        if (updatedSettings.currentTeamNumber > updatedSettings.numberOfTeams) {
+          setShowSummary(true);
+          return;
+        }
+
+        // Clear current spin
+        setCurrentSpin(null);
+        setHasSpunOnce(true);
+        setSpinState('spinning');
+
+        // Select results for all reels FIRST
+        const results: SpinResult = {
+          targetUser: selectRandomOption('targetUser'),
+          productType: selectRandomOption('productType'),
+          coreFeature: selectRandomOption('coreFeature'),
+        };
+
+        // Set the results immediately so reels know what to land on
+        setCurrentSpin(results);
+
+        // Start all reels spinning
+        setSpinningReels({
+          targetUser: true,
+          productType: true,
+          coreFeature: true,
+        });
+
+        // Stop reels sequentially
+        setTimeout(() => {
+          setSpinningReels(prev => ({ ...prev, targetUser: false }));
+        }, ANIMATION_CONFIG.spinDuration);
+
+        setTimeout(() => {
+          setSpinningReels(prev => ({ ...prev, productType: false }));
+        }, ANIMATION_CONFIG.spinDuration + ANIMATION_CONFIG.reelStopDelay);
+
+        setTimeout(() => {
+          setSpinningReels(prev => ({ ...prev, coreFeature: false }));
+        }, ANIMATION_CONFIG.spinDuration + ANIMATION_CONFIG.reelStopDelay * 2);
+
+        // Mark as fully stopped and trigger celebration
+        setTimeout(() => {
+          setSpinState('stopped');
+
+          // Trigger confetti
+          setTimeout(() => {
+            confetti({
+              particleCount: 100,
+              spread: 70,
+              origin: { y: 0.6 },
+              colors: ['#FF8F1C', '#EB0868', '#1E91D6'],
+            });
+          }, ANIMATION_CONFIG.celebrationDelay);
+
+          // Save team assignment
+          const newAssignment: TeamAssignment = {
+            teamNumber: updatedSettings.currentTeamNumber,
+            ...results,
+          };
+
+          updatedSettings.teamAssignments.push(newAssignment);
+
+          // Mark options as used if setting is enabled
+          if (updatedSettings.removeOptionsAfterSelection) {
+            (Object.keys(results) as Category[]).forEach(category => {
+              const option = results[category];
+              const availableIndex = updatedSettings.availableOptions[category].indexOf(option);
+              if (availableIndex > -1) {
+                updatedSettings.availableOptions[category].splice(availableIndex, 1);
+                updatedSettings.usedOptions[category].push(option);
+              }
+            });
+          }
+
+          setSettings(updatedSettings);
+        }, ANIMATION_CONFIG.spinDuration + ANIMATION_CONFIG.reelStopDelay * 2 + 500);
+      }
+    }
+  };
+
   const handleSettingsUpdate = (newSettings: AppSettings) => {
     setSettings(newSettings);
     setShowSettings(false);
@@ -166,21 +264,23 @@ export default function Home() {
   const allReelsStopped = !spinningReels.targetUser && !spinningReels.productType && !spinningReels.coreFeature;
 
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
+    <main className="min-h-screen p-2 md:p-4">
+      <div className="max-w-6xl mx-auto relative">
         {/* Header */}
-        <div className="text-center mb-8 relative">
-          <h1 className="text-4xl md:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-orange via-primary-magenta to-primary-orange mb-2 animate-pulse">
-            PRODUCT PITCH ROULETTE
+        <div className="text-center mb-4 relative">
+          <h1 className="text-4xl md:text-5xl font-bold mb-1">
+            <span className="text-primary-orange">PRODUCT </span>
+            <span className="text-primary-magenta">PITCH </span>
+            <span className="text-primary-orange">ROULETTE</span>
           </h1>
 
           {/* Settings Button */}
           <button
             onClick={() => setShowSettings(true)}
-            className="absolute top-0 right-0 p-3 rounded-full bg-secondary-dark-blue hover:bg-secondary-light-blue transition-colors"
+            className="absolute top-0 right-0 p-2 rounded-full bg-secondary-dark-blue hover:bg-secondary-light-blue transition-colors"
             aria-label="Settings"
           >
-            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -188,71 +288,56 @@ export default function Home() {
         </div>
 
         {/* Team Counter */}
-        <div className="text-center mb-6">
-          <p className="text-xl text-white">
+        <div className="text-center mb-4">
+          <p className="text-lg text-white">
             Team <span className="text-primary-orange font-bold">{Math.min(settings.currentTeamNumber, settings.numberOfTeams)}</span> of <span className="text-primary-magenta font-bold">{settings.numberOfTeams}</span>
           </p>
         </div>
 
-        {/* Slot Reels */}
-        <div className="mb-8">
-          <SlotReel
-            label={CATEGORY_LABELS.targetUser}
-            options={settings.availableOptions.targetUser}
-            isSpinning={spinningReels.targetUser}
-            finalValue={!spinningReels.targetUser ? currentSpin?.targetUser || null : null}
-            showAsLocked={spinState === 'stopped'}
-            spinDuration={ANIMATION_CONFIG.spinDuration}
-          />
-          <SlotReel
-            label={CATEGORY_LABELS.productType}
-            options={settings.availableOptions.productType}
-            isSpinning={spinningReels.productType}
-            finalValue={!spinningReels.productType ? currentSpin?.productType || null : null}
-            showAsLocked={spinState === 'stopped'}
-            spinDuration={ANIMATION_CONFIG.spinDuration}
-          />
-          <SlotReel
-            label={CATEGORY_LABELS.coreFeature}
-            options={settings.availableOptions.coreFeature}
-            isSpinning={spinningReels.coreFeature}
-            finalValue={!spinningReels.coreFeature ? currentSpin?.coreFeature || null : null}
-            showAsLocked={spinState === 'stopped'}
-            spinDuration={ANIMATION_CONFIG.spinDuration}
-          />
-        </div>
+        {/* Main Content - Centered Reels with Lever on Right */}
+        <div className="flex justify-center">
+          {/* Slot Reels - Centered */}
+          <div>
+            <SlotReel
+              label={CATEGORY_LABELS.targetUser}
+              options={settings.availableOptions.targetUser}
+              isSpinning={spinningReels.targetUser}
+              finalValue={!spinningReels.targetUser ? currentSpin?.targetUser || null : null}
+              showAsLocked={spinState === 'stopped'}
+              spinDuration={ANIMATION_CONFIG.spinDuration}
+            />
+            <SlotReel
+              label={CATEGORY_LABELS.productType}
+              options={settings.availableOptions.productType}
+              isSpinning={spinningReels.productType}
+              finalValue={!spinningReels.productType ? currentSpin?.productType || null : null}
+              showAsLocked={spinState === 'stopped'}
+              spinDuration={ANIMATION_CONFIG.spinDuration}
+            />
+            <SlotReel
+              label={CATEGORY_LABELS.coreFeature}
+              options={settings.availableOptions.coreFeature}
+              isSpinning={spinningReels.coreFeature}
+              finalValue={!spinningReels.coreFeature ? currentSpin?.coreFeature || null : null}
+              showAsLocked={spinState === 'stopped'}
+              spinDuration={ANIMATION_CONFIG.spinDuration}
+            />
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col items-center gap-4">
-          {spinState === 'idle' && canSpin && (
-            <button
-              onClick={handleSpin}
-              className="group relative px-12 py-6 bg-gradient-to-r from-primary-orange to-primary-magenta text-white text-2xl font-bold rounded-full shadow-2xl hover:shadow-primary-orange/50 transform hover:scale-105 transition-all duration-200"
-            >
-              <span className="relative z-10">PULL LEVER</span>
-              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 rounded-full transition-opacity"></div>
-            </button>
-          )}
-
-          {spinState === 'stopped' && allReelsStopped && (
-            <>
-              <button
-                onClick={handleNextTeam}
-                className="px-12 py-6 bg-gradient-to-r from-primary-magenta to-primary-orange text-white text-2xl font-bold rounded-full shadow-2xl hover:shadow-primary-magenta/50 transform hover:scale-105 transition-all duration-200"
-              >
-                {settings.currentTeamNumber <= settings.numberOfTeams ? 'NEXT TEAM' : 'VIEW ALL TEAMS'}
-              </button>
-
-              {settings.teamAssignments.length > 0 && (
-                <button
-                  onClick={() => setShowSummary(true)}
-                  className="px-6 py-3 bg-secondary-light-blue text-white font-semibold rounded-lg hover:bg-secondary-dark-blue transition-colors"
-                >
-                  View All Teams
-                </button>
-              )}
-            </>
-          )}
+          {/* Slot Machine Lever - Always Visible, Positioned to Right */}
+          <div className="absolute right-4 top-1/2 -translate-y-1/4 flex flex-col items-center justify-center gap-4">
+            <SlotLever
+              onPull={handleLeverClick}
+              disabled={spinState === 'spinning' || !canSpin}
+              label={
+                spinState === 'idle'
+                  ? (hasSpunOnce ? 'SPINNING...' : 'PULL!')
+                  : spinState === 'stopped'
+                    ? (settings.currentTeamNumber === settings.numberOfTeams ? 'VIEW RESULTS' : 'NEXT TEAM')
+                    : 'SPINNING...'
+              }
+            />
+          </div>
         </div>
       </div>
 
@@ -262,6 +347,10 @@ export default function Home() {
           settings={settings}
           onClose={() => setShowSettings(false)}
           onSave={handleSettingsUpdate}
+          onViewAssignments={() => {
+            setShowSettings(false);
+            setShowSummary(true);
+          }}
         />
       )}
 
