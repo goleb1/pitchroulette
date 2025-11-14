@@ -18,6 +18,33 @@ export const getInitialSettings = (): AppSettings => {
   };
 };
 
+// Merge new default options into existing settings
+// This ensures that when DEFAULT_OPTIONS are updated, new options are added
+// without losing existing progress or customizations
+const mergeDefaultOptions = (stored: AppSettings): AppSettings => {
+  const merged = { ...stored };
+  const categories: (keyof CategoryOptions)[] = ['targetUser', 'productType', 'coreFeature'];
+
+  categories.forEach(category => {
+    const defaultOptions = DEFAULT_OPTIONS[category];
+    const storedAvailable = merged.availableOptions[category] || [];
+    const storedUsed = merged.usedOptions[category] || [];
+    
+    // Combine all stored options (available + used) to see what we already have
+    const allStoredOptions = new Set([...storedAvailable, ...storedUsed]);
+    
+    // Find new options from defaults that aren't in stored settings
+    const newOptions = defaultOptions.filter(option => !allStoredOptions.has(option));
+    
+    // Add new options to available options
+    if (newOptions.length > 0) {
+      merged.availableOptions[category] = [...storedAvailable, ...newOptions];
+    }
+  });
+
+  return merged;
+};
+
 export const loadSettings = (): AppSettings => {
   if (typeof window === 'undefined') {
     return getInitialSettings();
@@ -26,7 +53,9 @@ export const loadSettings = (): AppSettings => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return JSON.parse(stored);
+      const parsed = JSON.parse(stored);
+      // Merge new default options into stored settings
+      return mergeDefaultOptions(parsed);
     }
   } catch (error) {
     console.error('Error loading settings from localStorage:', error);
