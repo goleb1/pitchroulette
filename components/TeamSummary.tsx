@@ -52,14 +52,14 @@ export default function TeamSummary({ assignments, onClose }: TeamSummaryProps) 
   };
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-secondary-dark-blue via-black to-black z-50 overflow-y-auto">
-      <div className="min-h-screen p-8">
+    <div className="fixed inset-0 bg-gradient-to-br from-secondary-dark-blue via-black to-black z-50 overflow-hidden">
+      <div className="h-screen flex flex-col p-4 md:p-6">
         {/* Header */}
-        <div className="text-center mb-12 relative">
+        <div className="text-center mb-3 md:mb-4 relative flex-shrink-0">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-6xl font-bold mb-4"
+            className="text-3xl md:text-4xl font-bold"
           >
             <span className="text-primary-orange">TEAM </span>
             <span className="text-primary-magenta">ASSIGNMENTS</span>
@@ -69,10 +69,10 @@ export default function TeamSummary({ assignments, onClose }: TeamSummaryProps) 
           <div className="absolute top-0 right-0">
             <button
               onClick={() => setShowActions(!showActions)}
-              className="p-2 rounded-full bg-secondary-dark-blue hover:bg-secondary-light-blue transition-colors text-white"
+              className="p-1.5 md:p-2 rounded-full bg-secondary-dark-blue hover:bg-secondary-light-blue transition-colors text-white"
               aria-label="Menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
               </svg>
             </button>
@@ -82,7 +82,7 @@ export default function TeamSummary({ assignments, onClose }: TeamSummaryProps) 
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="absolute right-0 mt-2 bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden"
+                className="absolute right-0 mt-2 bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden z-10"
               >
                 <button
                   onClick={handleCopyAll}
@@ -127,70 +127,62 @@ export default function TeamSummary({ assignments, onClose }: TeamSummaryProps) 
           </div>
         </div>
 
-        {/* Teams Grid */}
-        <div className={`grid gap-6 max-w-7xl mx-auto ${
-          assignments.length === 1 ? 'grid-cols-1 max-w-2xl' :
-          assignments.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
-          assignments.length <= 4 ? 'grid-cols-1 md:grid-cols-2' :
-          assignments.length <= 6 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
-          'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-        }`}>
-          {assignments.map((assignment, index) => (
-            <motion.div
-              key={assignment.teamNumber}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border-2 border-primary-magenta shadow-xl"
-            >
-              {/* Team Number Badge */}
-              <div className="flex items-center justify-center mb-4">
-                <div className="bg-primary-orange text-white font-bold text-2xl px-6 py-2 rounded-full">
-                  Team {assignment.teamNumber}
-                </div>
-              </div>
-
-              {/* Assignment Details */}
-              <div className="space-y-4">
-                <div className="bg-black/30 rounded-lg p-4">
-                  <div className="text-primary-orange font-bold text-sm uppercase tracking-wider mb-1">
-                    Target User
-                  </div>
-                  <div className="text-white text-lg">
-                    {assignment.targetUser}
+        {/* Teams Grid - Scrollable if needed, but optimized for 6 teams */}
+        <div className="flex-1 overflow-y-auto pb-4">
+          <div className={`grid gap-3 md:gap-4 max-w-7xl mx-auto ${
+            assignments.length === 1 ? 'grid-cols-1 max-w-2xl' :
+            assignments.length === 2 ? 'grid-cols-1 md:grid-cols-2' :
+            assignments.length <= 4 ? 'grid-cols-1 md:grid-cols-2' :
+            assignments.length <= 6 ? 'grid-cols-2 lg:grid-cols-3' :
+            'grid-cols-2 lg:grid-cols-3'
+          }`}>
+            {assignments.map((assignment, index) => (
+              <motion.div
+                key={assignment.teamNumber}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-lg md:rounded-xl p-3 md:p-4 border-2 border-primary-magenta shadow-xl"
+              >
+                {/* Team Number Badge */}
+                <div className="flex items-center justify-center mb-2 md:mb-3">
+                  <div className="bg-primary-orange text-white font-bold text-xl md:text-2xl px-4 md:px-6 py-1 md:py-2 rounded-full">
+                    Team {assignment.teamNumber}
                   </div>
                 </div>
 
-                <div className="bg-black/30 rounded-lg p-4">
-                  <div className="text-primary-magenta font-bold text-sm uppercase tracking-wider mb-1">
-                    Product Type
+                {/* Assignment Details */}
+                <div className="space-y-2 md:space-y-3">
+                  <div className="bg-black/30 rounded-lg p-2.5 md:p-3">
+                    <div className="text-primary-orange font-bold text-xs md:text-sm uppercase tracking-wider mb-0.5 md:mb-1">
+                      Target User
+                    </div>
+                    <div className="text-white text-base md:text-lg leading-tight">
+                      {assignment.targetUser}
+                    </div>
                   </div>
-                  <div className="text-white text-lg">
-                    {assignment.productType}
+
+                  <div className="bg-black/30 rounded-lg p-2.5 md:p-3">
+                    <div className="text-primary-magenta font-bold text-xs md:text-sm uppercase tracking-wider mb-0.5 md:mb-1">
+                      Product Type
+                    </div>
+                    <div className="text-white text-base md:text-lg leading-tight">
+                      {assignment.productType}
+                    </div>
+                  </div>
+
+                  <div className="bg-black/30 rounded-lg p-2.5 md:p-3">
+                    <div className="text-secondary-light-blue font-bold text-xs md:text-sm uppercase tracking-wider mb-0.5 md:mb-1">
+                      Core Feature
+                    </div>
+                    <div className="text-white text-base md:text-lg leading-tight">
+                      {assignment.coreFeature}
+                    </div>
                   </div>
                 </div>
-
-                <div className="bg-black/30 rounded-lg p-4">
-                  <div className="text-secondary-light-blue font-bold text-sm uppercase tracking-wider mb-1">
-                    Core Feature
-                  </div>
-                  <div className="text-white text-lg">
-                    {assignment.coreFeature}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Close Button at Bottom */}
-        <div className="text-center mt-12">
-          <button
-            onClick={onClose}
-            className="px-8 py-3 bg-primary-orange hover:bg-primary-magenta text-white font-bold rounded-full shadow-xl transform hover:scale-105 transition-all"
-          >
-            Back to Roulette
-          </button>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
