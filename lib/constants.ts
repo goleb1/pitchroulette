@@ -47,7 +47,7 @@ export const CATEGORY_LABELS = {
 
 // Animation timing constants (in milliseconds) - easily tweakable
 export const ANIMATION_CONFIG = {
-  spinDuration: 2500, // How long each reel spins
+  spinDuration: 2000, // How long each reel spins
   reelStopDelay: 500, // Delay between each reel stopping
   celebrationDelay: 300, // Delay before showing celebration
 };
