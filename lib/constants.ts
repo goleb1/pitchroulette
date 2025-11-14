@@ -5,31 +5,37 @@ export const DEFAULT_OPTIONS: CategoryOptions = {
     'Toddlers with executive authority',
     'People who refuse to admit they need help',
     'Conspiracy theorists',
-    'Time travelers from exactly 1987',
-    'Cats (house cats specifically)',
+    'Time travelers',
+    'Dog/Cat Owners',
     'People who peaked in high school',
-    'Grandparents trying to understand "the youths"',
-    'People who exclusively communicate in movie quotes',
+    'Extremely competitive people',
+    'People who are always running late',
+    'People going through a midlife crisis',
+    'Neighbors who are too friendly',
   ],
   productType: [
-    'Wearable device (must be visible)',
-    'Mobile app (but it can\'t use notifications)',
+    'Wearable device',
+    'Mobile app',
     'Subscription box service',
-    'Physical product (no electronics)',
     'Government-mandated program',
-    'Browser extension',
     'Smart home device',
     'Live service with human employees',
+    'Food or beverage product',
+    'Piece of furniture',
+    'Clothing or fashion item',
+    'Training program or certification',
   ],
   coreFeature: [
-    'Only works on Tuesdays',
-    'Powered by embarrassment (the more embarrassed you are, the better it works)',
-    'Requires a buddy system - can\'t use it alone',
+    'Only works on certain days of the week',
+    'Powered by embarrassment',
+    'Requires a buddy system - cannot use it alone',
     'Gets worse the more you use it',
-    'Illegal in at least 3 states',
-    'Requires you to share something personal with a stranger first',
-    'Only works if you\'re lying',
     'Makes a loud noise every time you use it',
+    'Only works if you are in a bad mood',
+    'Gets more expensive the more desperate you are',
+    'Changes color based on your emotions',
+    'Only works if you are wearing something specific',
+    'Broadcasts what you are doing to social media automatically',
   ],
 };
 
@@ -41,8 +47,8 @@ export const CATEGORY_LABELS = {
 
 // Animation timing constants (in milliseconds) - easily tweakable
 export const ANIMATION_CONFIG = {
-  spinDuration: 2000, // How long each reel spins
-  reelStopDelay: 400, // Delay between each reel stopping
+  spinDuration: 2500, // How long each reel spins
+  reelStopDelay: 500, // Delay between each reel stopping
   celebrationDelay: 300, // Delay before showing celebration
 };
 
